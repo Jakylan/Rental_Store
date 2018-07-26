@@ -29,43 +29,49 @@ def choose_console(inventory):
     for item in inventory:
         console = inventory[item]
         print(item)
-        print('   Rental', console['Rental'])
-        print('   In-Stock', console['In-Stock'])
-        print('   Price', console['Price'])
+        print('   Rental:', console['Rental'])
+        print('   In-Stock:', console['In-Stock'])
+        print('   Price:', console['Price'])
+        print('----------------------------------------')
     while True:
         item = input('\nWhich console would you like?\n')
         if item in inventory:
+            print('----------------------------------------')
             print('Excellent choice!')
-            break
+            exit()
         elif item == 'quit':
             break
         else:
             print(
-                '\nSorry we do not have this in stock please choose anther console!\n'
+                '\nSorry we do not have this in stock please choose another console!\n'
             )
 
 
 def main():
     inventory = load_inventory()
     print('\nHello welcome to Base Camp Rentals!\n')
-    response = input('\nAre you a customer or a employee?\n')
     while True:
+        response = input('\nAre you a customer or a employee?\n')
         if response == 'customer':
             print('\nGreat!')
             response = input('\nWould you like to rent a console?\n')
             if response == 'yes':
+                print('----------------------------------------')
                 choose_console(inventory)
         elif response == 'employee':
             print('\nHi, employee!\n')
             response = input('\nWould you like to view the inventory?\n')
             if response == 'yes':
                 print(inventory)
+                break
             elif response == 'no':
                 print('\nHave a great day!\n')
                 break
         elif response == 'quit':
             print('\nHave a great day!\n')
             break
+        else:
+            print('\nPlease provide an valid answer!\n')
 
 
 if __name__ == '__main__':
