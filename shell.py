@@ -1,3 +1,33 @@
+from datetime import datetime
+
+
+def customer_or_employee():
+    inventory = load_inventory()
+    print('\nHello welcome to Base Camp Rentals!\n')
+    while True:
+        response = input('\nAre you a customer or a employee?\n')
+        if response == 'customer':
+            print('\nGreat!')
+            response = input('\nWould you like to rent a console?\n')
+            if response == 'yes':
+                print('----------------------------------------')
+                choose_console(inventory)
+        elif response == 'employee':
+            print('\nHi, employee!\n')
+            response = input('\nWould you like to view the inventory?\n')
+            if response == 'yes':
+                print(inventory)
+                break
+            elif response == 'no':
+                print('\nHave a great day!\n')
+                break
+        elif response == 'quit':
+            print('\nHave a great day!\n')
+            break
+        else:
+            print('\nPlease provide an valid answer!\n')
+
+
 def parse_inventory_item(string):
     rental, in_stock, price = string.split(',')
     return [rental, int(in_stock), int(price)]
@@ -36,9 +66,24 @@ def choose_console(inventory):
     while True:
         item = input('\nWhich console would you like?\n')
         if item in inventory:
-            print('----------------------------------------')
-            print('Excellent choice!')
-            exit()
+            if item == 'Xbox One X':
+                print('----------------------------------------')
+                print('You have chosen the Xbox One X!')
+                print('   Price:', console['Price'])
+                print('Excellent choice!')
+                exit()
+            if item == 'PlayStation 4 Pro 1TB':
+                print('----------------------------------------')
+                print('You have chosen the PlayStation 4 Pro 1TB')
+                print('   Price:', console['Price'])
+                print('Excellent choice!')
+                exit()
+            if item == 'Super NES Classic':
+                print('----------------------------------------')
+                print('You have chosen the Super NES Classic!')
+                print('   Price:', console['Price'])
+                print('Excellent choice!')
+                exit()
         elif item == 'quit':
             break
         else:
@@ -48,30 +93,8 @@ def choose_console(inventory):
 
 
 def main():
+    customer_or_employee()
     inventory = load_inventory()
-    print('\nHello welcome to Base Camp Rentals!\n')
-    while True:
-        response = input('\nAre you a customer or a employee?\n')
-        if response == 'customer':
-            print('\nGreat!')
-            response = input('\nWould you like to rent a console?\n')
-            if response == 'yes':
-                print('----------------------------------------')
-                choose_console(inventory)
-        elif response == 'employee':
-            print('\nHi, employee!\n')
-            response = input('\nWould you like to view the inventory?\n')
-            if response == 'yes':
-                print(inventory)
-                break
-            elif response == 'no':
-                print('\nHave a great day!\n')
-                break
-        elif response == 'quit':
-            print('\nHave a great day!\n')
-            break
-        else:
-            print('\nPlease provide an valid answer!\n')
 
 
 if __name__ == '__main__':
