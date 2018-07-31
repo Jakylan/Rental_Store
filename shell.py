@@ -1,4 +1,5 @@
 from datetime import datetime
+from core import *
 
 
 def customer_or_employee():
@@ -12,6 +13,7 @@ def customer_or_employee():
             if response == 'yes':
                 print('----------------------------------------')
                 choose_console(inventory)
+                break
         elif response == 'employee':
             print('\nHi, employee!\n')
             response = input('\nWould you like to view the inventory?\n')
@@ -31,6 +33,22 @@ def customer_or_employee():
 def parse_inventory_item(string):
     rental, in_stock, price = string.split(',')
     return [rental, int(in_stock), int(price)]
+
+
+def inventory():
+    inventory = [{
+        'rental': 'Xbox One X',
+        'in-stock': 30,
+        'price': 175
+    }, {
+        'rental': 'PlayStation 4 Pro 1TB',
+        'in-stock': 25,
+        'price': 150,
+    }, {
+        'rental': 'Super NES Classic',
+        'in-stock': 20,
+        'price': 75
+    }]
 
 
 def load_inventory():
@@ -71,19 +89,19 @@ def choose_console(inventory):
                 print('You have chosen the Xbox One X!')
                 print('   Price:', console['Price'])
                 print('Excellent choice!')
-                exit()
+                break
             if item == 'PlayStation 4 Pro 1TB':
                 print('----------------------------------------')
                 print('You have chosen the PlayStation 4 Pro 1TB')
                 print('   Price:', console['Price'])
                 print('Excellent choice!')
-                exit()
+                break
             if item == 'Super NES Classic':
                 print('----------------------------------------')
                 print('You have chosen the Super NES Classic!')
                 print('   Price:', console['Price'])
                 print('Excellent choice!')
-                exit()
+                break
         elif item == 'quit':
             break
         else:
@@ -92,9 +110,22 @@ def choose_console(inventory):
             )
 
 
+def write_to_history(item, price, time):
+    price = get_game_price()
+    item = choose_console()
+    time = datetime.now()
+    text = '\n{}, {}, {}'.format(item, price, time)
+    with open('history.txt', 'a') as file:
+        file.write(text)
+
+
 def main():
     customer_or_employee()
     inventory = load_inventory()
+    item = choose_console
+    price = get_game_price()
+    write_to_history(item, price, time)
+    inventory()
 
 
 if __name__ == '__main__':
