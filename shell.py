@@ -1,28 +1,28 @@
 from datetime import datetime
-from core import *
+import core
+import disk
 
 
-def customer_or_employee():
-    inventory = load_inventory()
+def customer_or_employee(inventory):
     print('\nHello welcome to Base Camp Rentals!\n')
     while True:
-        response = input('\nAre you a customer or a employee?\n')
+        response = input('\nAre you a customer or a employee?\n').lower()
         if response == 'customer':
             print('\nGreat!')
-            response = input('\nWould you like to rent a console?\n')
+            response = input('\nWould you like to rent a console?\n').lower()
             if response == 'yes':
                 print('----------------------------------------')
-                choose_console(inventory)
-                break
+                return True
         elif response == 'employee':
             print('\nHi, employee!\n')
-            response = input('\nWould you like to view the inventory?\n')
+            response = input(
+                '\nWould you like to view the inventory?\n').lower()
             if response == 'yes':
                 print(inventory)
-                break
-            elif response == 'no':
-                print('\nHave a great day!\n')
-                break
+                exit()
+        elif response == 'no':
+            print('\nHave a great day!\n')
+            break
         elif response == 'quit':
             print('\nHave a great day!\n')
             break
@@ -30,25 +30,17 @@ def customer_or_employee():
             print('\nPlease provide an valid answer!\n')
 
 
+def print_inventory(inventory):
+    for item in inventory:
+        print(item)
+
+
 def parse_inventory_item(string):
-    rental, in_stock, price = string.split(',')
-    return [rental, int(in_stock), int(price)]
-
-
-def inventory():
-    inventory = [{
-        'rental': 'Xbox One X',
-        'in-stock': 30,
-        'price': 175
-    }, {
-        'rental': 'PlayStation 4 Pro 1TB',
-        'in-stock': 25,
-        'price': 150,
-    }, {
-        'rental': 'Super NES Classic',
-        'in-stock': 20,
-        'price': 75
-    }]
+    if string.count(',') == 3:
+        rental, in_stock, price, replacement = string.split(',')
+        return [rental, int(in_stock), int(price), int(replacement)]
+    else:
+        return ['', 0, 0, 0]
 
 
 def load_inventory():
@@ -63,14 +55,17 @@ def load_inventory():
                 'Rental': d[0],
                 'In-Stock': d[1],
                 'Price': d[2],
+                'Replacement': d[3]
             }
 
     return inventory
 
 
-def print_inventory(inventory):
-    for item in inventory:
-        print(item)
+def write_inventory(inventory):
+    time = datetime.now()
+    text = '\n{}, {}, {}'.format(time, item, price)
+    with open('history.txt', 'r') as file:
+        string = file.readlines(text)
 
 
 def choose_console(inventory):
@@ -80,28 +75,28 @@ def choose_console(inventory):
         print('   Rental:', console['Rental'])
         print('   In-Stock:', console['In-Stock'])
         print('   Price:', console['Price'])
+        print('   Replacement:', console['Price'] * .10)
         print('----------------------------------------')
     while True:
         item = input('\nWhich console would you like?\n')
-        if item in inventory:
-            if item == 'Xbox One X':
-                print('----------------------------------------')
-                print('You have chosen the Xbox One X!')
-                print('   Price:', console['Price'])
-                print('Excellent choice!')
-                break
-            if item == 'PlayStation 4 Pro 1TB':
-                print('----------------------------------------')
-                print('You have chosen the PlayStation 4 Pro 1TB')
-                print('   Price:', console['Price'])
-                print('Excellent choice!')
-                break
-            if item == 'Super NES Classic':
-                print('----------------------------------------')
-                print('You have chosen the Super NES Classic!')
-                print('   Price:', console['Price'])
-                print('Excellent choice!')
-                break
+        if item.lower() in 'Xbox One X'.lower():
+            print('----------------------------------------')
+            print('You have chosen the Xbox One X!')
+            print('   Price:', console['Price'])
+            print('Excellent choice!')
+            return 'Xbox One X'
+        elif item.lower() in 'PlayStation 4 Pro 1TB'.lower():
+            print('----------------------------------------')
+            print('You have chosen the PlayStation 4 Pro 1TB')
+            print('   Price:', console['Price'])
+            print('Excellent choice!')
+            return 'Playstation 4 Pro 1TB'
+        elif item.lower() in 'Super NES Classic'.lower():
+            print('----------------------------------------')
+            print('You have chosen the Super NES Classic!')
+            print('   Price:', console['Price'])
+            print('Excellent choice!')
+            return 'Super NES Classic'
         elif item == 'quit':
             break
         else:
@@ -110,22 +105,17 @@ def choose_console(inventory):
             )
 
 
-def write_to_history(item, price, time):
-    price = get_game_price()
-    item = choose_console()
-    time = datetime.now()
-    text = '\n{}, {}, {}'.format(item, price, time)
-    with open('history.txt', 'a') as file:
-        file.write(text)
-
-
 def main():
-    customer_or_employee()
     inventory = load_inventory()
-    item = choose_console
-    price = get_game_price()
-    write_to_history(item, price, time)
-    inventory()
+    customer = customer_or_employee(inventory)
+    if customer:
+        item = choose_console(inventory)
+        time = datetime.now()
+        console = inventory[item]
+        in_stock = console['In-Stock']
+        price = console['Price']
+        replacement = console['Price'] * .10
+        disk.write_file(time, item, in_stock, price, replacement)
 
 
 if __name__ == '__main__':
