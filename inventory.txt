@@ -1,4 +1,6 @@
-rental:, in-stock:, price:
-Xbox One X, 30, 175
-PlayStation 4 Pro 1TB, 25, 150
-Super NES Classic, 20, 75
+rental:, in-stock:, price:, replacement:
+Xbox One X, 30, 175, 300
+PlayStation 4 Pro 1TB, 25, 150, 250
+Super NES Classic, 20, 75, 100
+
+2018-08-06 16:13:25.531368, 30, 175
