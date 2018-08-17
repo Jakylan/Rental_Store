@@ -3,23 +3,20 @@ import core
 import disk
 
 
-def customer_or_employee(inventory):
-    print('\nHello welcome to Base Camp Rentals!\n')
+def customer_or_employee(inventory, revenue):
+    print('\nHello Welcome to Base Camp Rentals!\n')
     while True:
         response = input('\nAre you a customer or a employee?\n').lower()
         if response == 'customer':
             print('\nGreat!')
-            response = input('\nWould you like to rent a console?\n').lower()
-            if response == 'yes':
-                print('----------------------------------------')
-                return True
+            rent_or_return = input(
+                'Are you renting or returning? ').lower().strip()
+            if rent_or_return == 'renting':
+                choose_console(inventory, revenue)
+            elif rent_or_return == 'returning':
+                return_item(inventory, revenue)
         elif response == 'employee':
-            print('\nHi, employee!\n')
-            response = input(
-                '\nWould you like to view the inventory?\n').lower()
-            if response == 'yes':
-                print(inventory)
-                exit()
+            employee(inventory, revenue)
         elif response == 'no':
             print('\nHave a great day!\n')
             break
@@ -30,9 +27,38 @@ def customer_or_employee(inventory):
             print('\nPlease provide an valid answer!\n')
 
 
+def employee(inventory, revenue):
+    while True:
+        print('\nHi, employee!\n')
+        print(
+            "[1] See inventory\n[2] See History\n[3] See revenue\n[4] Quit\n")
+        response = input("what would you like to do? ").strip()
+        if response == '1':
+            see_stock(inventory)
+        elif response == '2':
+            contents = disk.file_contents('history.txt')
+            print(contents)
+        elif response == '3':
+            print('Revenue: {:.2f}'.format(revenue['total']))
+
+        elif response == '4':
+            exit()
+
+
+def see_stock(inventory):
+    for item in inventory:
+        print("{} -- In Stock: {}".format(item, inventory[item]['in-stock']))
+
+
 def print_inventory(inventory):
     for item in inventory:
-        print(item)
+        name = item
+        in_stock = inventory[item]['in-stock']
+        price = inventory[item]['price']
+        replacement = inventory[item]['replacement']
+        print('-----------------------------\n', name, '\nIn-Stock: ',
+              in_stock, '\nPrice: ', price, '\nReplacement: ', replacement)
+    print('-----------------------------')
 
 
 def parse_inventory_item(string):
@@ -43,60 +69,41 @@ def parse_inventory_item(string):
         return ['', 0, 0, 0]
 
 
-def load_inventory():
-    with open('inventory.txt', 'r') as file:
-        string = file.read()
-    inventory = {}
-    lines = string.split('\n')[1:]
-    for line in lines:
-        if line:
-            d = parse_inventory_item(line)
-            inventory[d[0]] = {
-                'Rental': d[0],
-                'In-Stock': d[1],
-                'Price': d[2],
-                'Replacement': d[3]
-            }
-
-    return inventory
-
-
-def write_inventory(inventory):
-    time = datetime.now()
-    text = '\n{}, {}, {}'.format(time, item, price)
-    with open('history.txt', 'r') as file:
-        string = file.readlines(text)
-
-
-def choose_console(inventory):
+def choose_console(inventory, revenue):
     for item in inventory:
-        console = inventory[item]
-        print(item)
-        print('   Rental:', console['Rental'])
-        print('   In-Stock:', console['In-Stock'])
-        print('   Price:', console['Price'])
-        print('   Replacement:', console['Price'] * .10)
+        name = item
+        in_stock = inventory[item]['in-stock']
+        price = inventory[item]['price']
+        replacement = inventory[item]['replacement']
+        print('---------------------------------------- \n', name,
+              '\nIn-Stock: ', in_stock, '\nPrice: ', price, '\nReplacement: ',
+              replacement)
         print('----------------------------------------')
     while True:
         item = input('\nWhich console would you like?\n')
-        if item.lower() in 'Xbox One X'.lower():
-            print('----------------------------------------')
-            print('You have chosen the Xbox One X!')
-            print('   Price:', console['Price'])
+        if item in inventory:
+            console = inventory[item]
+            print('-----------------------------')
+            print(f'You have chosen the {item}!')
+            deposit = core.deposit(inventory, item)
+            total = core.total(inventory, item, deposit)
+            print('   Price:', inventory[item]['price'], 'Deposit:', deposit)
+            print('Your Total With Taxes is {:.2f}'.format(total))
             print('Excellent choice!')
-            return 'Xbox One X'
-        elif item.lower() in 'PlayStation 4 Pro 1TB'.lower():
-            print('----------------------------------------')
-            print('You have chosen the PlayStation 4 Pro 1TB')
-            print('   Price:', console['Price'])
-            print('Excellent choice!')
-            return 'Playstation 4 Pro 1TB'
-        elif item.lower() in 'Super NES Classic'.lower():
-            print('----------------------------------------')
-            print('You have chosen the Super NES Classic!')
-            print('   Price:', console['Price'])
-            print('Excellent choice!')
-            return 'Super NES Classic'
+            # item_name = inventory[item]
+            core.remove_from_stock(inventory, item)
+            disk.write_file(item, inventory[item]['in-stock'], price,
+                            replacement, 'Renting')
+            disk.write_inventory(
+                core.update_inventory(inventory), 'inventory.txt')
+            core.update_inventory(inventory)
+            core.add_to_revenue(revenue, inventory[item]['price'], deposit)
+            string = core.revenue_string(revenue)
+            disk.write_revenue(string, 'revenue.txt')
+            # remove
+            # save inventory
+            # write history
+            return item
         elif item == 'quit':
             break
         else:
@@ -105,17 +112,37 @@ def choose_console(inventory):
             )
 
 
+def return_item(inventory, revenue):
+    print_inventory(inventory)
+    while True:
+        item = input('What would you like to return? ')
+        if item in inventory:
+            core.add_to_stock(inventory, item)
+            disk.write_file(item, inventory[item]['in-stock'],
+                            inventory[item]['price'],
+                            inventory[item]['replacement'], 'Returned')
+            disk.write_inventory(
+                core.update_inventory(inventory), 'inventory.txt')
+            core.update_inventory(inventory)
+            print('Item was successfully returned')
+            deposit = core.deposit(inventory, item)
+            print("Here is your deposit back\n${:.2f} ".format(deposit))
+            core.subtract_revenue(revenue, deposit)
+            string = core.revenue_string(revenue)
+            disk.write_revenue(string, 'revenue.txt')
+            break
+        else:
+            print('Cannot return that item here')
+
+
 def main():
-    inventory = load_inventory()
-    customer = customer_or_employee(inventory)
-    if customer:
-        item = choose_console(inventory)
-        time = datetime.now()
-        console = inventory[item]
-        in_stock = console['In-Stock']
-        price = console['Price']
-        replacement = console['Price'] * .10
-        disk.write_file(time, item, in_stock, price, replacement)
+    file_info = disk.read_file('inventory.txt')
+    revenue_info = disk.read_file('revenue.txt')
+    revenue = core.revenue_dictionary(revenue_info)
+    inventory = core.inventory_info(file_info)
+    print(revenue_info)
+    customer_or_employee(inventory, revenue)
+    #item = choose_console(inventory)
 
 
 if __name__ == '__main__':
